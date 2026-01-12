@@ -106,6 +106,9 @@ function Update-Profile($profilePath, $shellInitLine) {
   # Terminal-Icons
   if (-not ($lines -match 'Import-Module Terminal-Icons')) { $lines += 'Import-Module Terminal-Icons' }
 
+  # zoxide
+  if (-not ($lines -match 'zoxide init')) { $lines += 'zoxide init powershell | Invoke-Expression' }
+
   Set-Content -Path $profilePath -Value $lines
   Write-Host "Updated profile: $profilePath"
 }
@@ -113,6 +116,8 @@ function Update-Profile($profilePath, $shellInitLine) {
 Write-Section "Preflight"
 Ensure-Winget
 Write-Ok "winget ready"
+Set-ExecutionPolicy Unrestricted -Scope LocalMachine -Force
+Write-Ok "Execution policy set to Unrestricted"
 
 Write-Section "Install Apps"
 # Install apps in a stable order
@@ -124,6 +129,7 @@ $wingetIds = @(
   'Python.Launcher',
   'DEVCOM.JetBrainsMonoNerdFont',
   'JanDeDobbeleer.OhMyPosh',
+  'ajeetdsouza.zoxide',
   'GNU.MidnightCommander',
   'Git.Git',
   'GitHub.cli',
