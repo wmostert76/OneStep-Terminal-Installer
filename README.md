@@ -1,7 +1,7 @@
 # OneStep Terminal Installer
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/wmostert76/OneStep-Terminal-Installer/master/assets/hero.svg" alt="OneStep Terminal Installer" width="860" />
+  <img src="https://raw.githubusercontent.com/wmostert76/OneStep-Terminal-Installer/master/assets/hero-v2.svg" alt="OneStep Terminal Installer" width="860" />
 </p>
 
 <p align="center">
@@ -68,4 +68,5 @@ Open `one-step-install.ps1` and edit:
 ## License
 
 MIT
+
 
