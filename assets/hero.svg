@@ -9,5 +9,5 @@
   <rect x="60" y="60" width="1080" height="200" rx="18" fill="#0f172a" stroke="#334155" stroke-width="2"/>
   <text x="120" y="140" font-family="Segoe UI, Arial, sans-serif" font-size="48" fill="#e2e8f0">OneStep Terminal Installer</text>
   <text x="120" y="190" font-family="Segoe UI, Arial, sans-serif" font-size="22" fill="#94a3b8">PowerShell + Windows Terminal, themed, clean, and repeatable</text>
-  <text x="120" y="230" font-family="Consolas, monospace" font-size="18" fill="#38bdf8">irm "https://raw.githubusercontent.com/wmostert76/OneStep-Terminal-Installer/master/one-step-install.ps1" | iex</text>
 </svg>
+
