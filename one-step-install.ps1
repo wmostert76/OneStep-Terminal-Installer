@@ -4,6 +4,19 @@
 
 $ErrorActionPreference = 'Stop'
 
+function Write-Section($text) {
+  Write-Host ""
+  Write-Host ("[ " + $text + " ]") -ForegroundColor Cyan
+}
+
+function Write-Ok($text) { Write-Host ("[OK] " + $text) -ForegroundColor Green }
+function Write-Info($text) { Write-Host ("[INFO] " + $text) -ForegroundColor Yellow }
+
+Write-Host "========================================" -ForegroundColor Magenta
+Write-Host "  OneStep Terminal Installer" -ForegroundColor Magenta
+Write-Host "  Setup in minutes. Clean. Repeatable." -ForegroundColor DarkMagenta
+Write-Host "========================================" -ForegroundColor Magenta
+
 function Ensure-Winget {
   if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
     throw 'winget not found. Install App Installer from Microsoft Store.'
@@ -21,7 +34,7 @@ function Is-WingetInstalled($id) {
 
 function Install-WingetPkg($id) {
   if (Is-WingetInstalled $id) {
-    Write-Host "Already installed: $id"
+    Write-Ok "Already installed: $id"
     return
   }
   winget install --id $id --source winget --accept-package-agreements --accept-source-agreements | Out-Host
@@ -97,8 +110,11 @@ function Update-Profile($profilePath, $shellInitLine) {
   Write-Host "Updated profile: $profilePath"
 }
 
+Write-Section "Preflight"
 Ensure-Winget
+Write-Ok "winget ready"
 
+Write-Section "Install Apps"
 # Install apps in a stable order
 $wingetIds = @(
   'Microsoft.WindowsTerminal',
@@ -116,6 +132,7 @@ $wingetIds = @(
 )
 $wingetIds | ForEach-Object { Install-WingetPkg $_ }
 
+Write-Section "PowerShell Modules"
 # PowerShell modules (avoid NuGet prompt)
 Ensure-NuGetProvider
 powershell -NoProfile -Command "Install-Module PSReadLine -Scope CurrentUser -Force" | Out-Host
@@ -124,18 +141,23 @@ if (Test-Path 'C:\Program Files\PowerShell\7\pwsh.exe') {
   & "C:\Program Files\PowerShell\7\pwsh.exe" -NoProfile -Command "Install-Module Terminal-Icons -Scope CurrentUser -Force" | Out-Host
 }
 
+Write-Section "NPM Global Tools"
 # NPM global packages (after Node is present)
 if (Get-Command npm -ErrorAction SilentlyContinue) {
   npm install -g npm@11.7.0 | Out-Host
   npm install -g @google/gemini-cli@0.23.0 @openai/codex@0.80.0 opencode-ai@1.1.13 opencode-windows-x64@1.1.13 | Out-Host
 }
 
+Write-Section "Shell Theme + Profiles"
 # Configure themes and profiles
 $themePath = Ensure-ThemeFile
 Update-Profile "$env:USERPROFILE\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1" "oh-my-posh init powershell --config `"$themePath`" | Invoke-Expression"
 Update-Profile "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1" "oh-my-posh init pwsh --config `"$themePath`" | Invoke-Expression"
 
+Write-Section "Windows Terminal"
 # Terminal settings (after Windows Terminal install)
 Set-WindowsTerminalFontAndDefaultProfile
 
-Write-Host 'Done. Restart Windows Terminal or run . $PROFILE in each shell.'
+Write-Host ""
+Write-Host "Done." -ForegroundColor Green
+Write-Info "Restart Windows Terminal or run . `$PROFILE in each shell."
