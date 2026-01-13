@@ -23,9 +23,11 @@ irm "https://raw.githubusercontent.com/wmostert76/OneStep-Terminal-Installer/mas
 - Windows Terminal with a clean default profile
 - PowerShell 7 and Windows PowerShell profiles aligned
 - Oh My Posh with the bubbles theme
+- Zoxide (smarter cd) support
 - JetBrainsMono Nerd Font
 - History suggestions (list view) with a clean prompt
 - Terminal-Icons for nice directory listings
+- Automatic UAC and Execution Policy configuration
 - Node.js + npm globals (gemini-cli, codex, opencode)
 - Git, GitHub CLI, 7-Zip, Midnight Commander, Chrome
 
@@ -38,11 +40,18 @@ irm "https://raw.githubusercontent.com/wmostert76/OneStep-Terminal-Installer/mas
 - Python.Launcher
 - DEVCOM.JetBrainsMonoNerdFont
 - JanDeDobbeleer.OhMyPosh
+- ajeetdsouza.zoxide
 - GNU.MidnightCommander
 - Git.Git
 - GitHub.cli
 - 7zip.7zip
 - Google.Chrome
+
+## System Changes
+
+- **Execution Policy:** Sets `LocalMachine` (or `CurrentUser` fallback) to `Unrestricted`.
+- **UAC:** Disables User Account Control via registry (requires reboot).
+- **Terminal Settings:** Configures JetBrainsMono Nerd Font as default and sets PowerShell as the default profile.
 
 ## What it installs (npm -g)
 
