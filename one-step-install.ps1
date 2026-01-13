@@ -186,19 +186,31 @@ Write-Section "NPM Global Tools"
 try {
   if (Get-Command npm -ErrorAction SilentlyContinue) {
     Write-Info "Installing global NPM tools..."
-    npm install -g npm@11.7.0 | Out-Host
-    npm install -g @google/gemini-cli@0.23.0 @openai/codex@0.80.0 opencode-ai@1.1.13 opencode-windows-x64@1.1.13 | Out-Host
+    
+    $npmPackages = @(
+      "npm@11.7.0",
+      "@google/gemini-cli@0.23.0",
+      "@openai/codex@0.80.0",
+      "opencode-ai@1.1.13",
+      "opencode-windows-x64@1.1.13"
+    )
 
-    # Ensure npm global bin is in PATH
+    foreach ($pkg in $npmPackages) {
+      Write-Info "Installing $pkg..."
+      npm install -g $pkg | Out-Null
+    }
+
+    # Ensure npm global bin is in PATH (Works for ALL npm packages)
     $npmPrefix = (npm config get prefix).Trim()
     if ($npmPrefix) {
       $currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
       if ($currentPath -notlike "*$npmPrefix*") {
-        Write-Info "Adding $npmPrefix to User PATH..."
+        Write-Info "Adding $npmPrefix to User PATH (Enables all global npm tools)..."
         [Environment]::SetEnvironmentVariable("Path", "$currentPath;$npmPrefix", "User")
         $env:Path += ";$npmPrefix"
       }
     }
+    Write-Ok "Global NPM tools ready."
   }
 } catch {
   Write-Warning "Could not install NPM tools: $_"
