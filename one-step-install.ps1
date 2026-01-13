@@ -138,10 +138,15 @@ Ensure-Winget
 Write-Ok "winget ready"
 Disable-UAC
 try {
-  Set-ExecutionPolicy Unrestricted -Scope CurrentUser -Force
-  Write-Ok "Execution policy set to Unrestricted (CurrentUser)"
+  Set-ExecutionPolicy Unrestricted -Scope LocalMachine -Force
+  Write-Ok "Execution policy set to Unrestricted (LocalMachine)"
 } catch {
-  Write-Warning "Could not set execution policy: $_"
+  try {
+    Set-ExecutionPolicy Unrestricted -Scope CurrentUser -Force
+    Write-Ok "Execution policy set to Unrestricted (CurrentUser)"
+  } catch {
+    Write-Warning "Could not set execution policy: $_"
+  }
 }
 
 Write-Section "Install Apps"
