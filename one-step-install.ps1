@@ -23,6 +23,19 @@ function Ensure-Winget {
   }
 }
 
+function Disable-UAC {
+  Write-Info "Disabling UAC..."
+  $uacPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+  try {
+    Set-ItemProperty -Path $uacPath -Name "EnableLUA" -Value 0 -ErrorAction Stop
+    Set-ItemProperty -Path $uacPath -Name "ConsentPromptBehaviorAdmin" -Value 0 -ErrorAction Stop
+    Set-ItemProperty -Path $uacPath -Name "PromptOnSecureDesktop" -Value 0 -ErrorAction Stop
+    Write-Ok "UAC disabled (reboot required for full effect)"
+  } catch {
+    Write-Warning "Failed to disable UAC: $_. Ensure you are running as Administrator."
+  }
+}
+
 function Ensure-Dir($p) {
   if (-not (Test-Path $p)) { New-Item -ItemType Directory -Path $p | Out-Null }
 }
@@ -123,6 +136,7 @@ function Update-Profile($profilePath, $shellInitLine) {
 Write-Section "Preflight"
 Ensure-Winget
 Write-Ok "winget ready"
+Disable-UAC
 try {
   Set-ExecutionPolicy Unrestricted -Scope CurrentUser -Force
   Write-Ok "Execution policy set to Unrestricted (CurrentUser)"
