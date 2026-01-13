@@ -126,6 +126,10 @@ function Update-Profile($profilePath, $shellInitLine) {
   # Terminal-Icons
   if (-not ($lines -match 'Import-Module Terminal-Icons')) { $lines += 'Import-Module Terminal-Icons' }
 
+  # Ensure npm global path is in session
+  $npmPathLine = '$npmPrefix = (npm config get prefix).Trim(); if ($npmPrefix -and $env:Path -notlike "*$npmPrefix*") { $env:Path += ";$npmPrefix" }'
+  if (-not ($lines -match 'npm config get prefix')) { $lines += $npmPathLine }
+
   # zoxide
   if (-not ($lines -match 'zoxide init')) { $lines += 'zoxide init powershell | Out-String | Invoke-Expression' }
 
@@ -222,8 +226,21 @@ $themePath = Ensure-ThemeFile
 Update-Profile "$env:USERPROFILE\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1" "oh-my-posh init powershell --config `"$themePath`" | Out-String | Invoke-Expression"
 Update-Profile "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1" "oh-my-posh init pwsh --config `"$themePath`" | Out-String | Invoke-Expression"
 
+function Update-Environment {
+  Write-Info "Refreshing environment variables..."
+  $code = @'
+    [System.Runtime.InteropServices.DllImport("user32.dll", SetLastError = true, CharSet = System.Runtime.InteropServices.CharSet.Auto)]
+    public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, UIntPtr wParam, string lParam, uint fuFlags, uint uTimeout, out UIntPtr lpdwResult);
+'@
+  $type = Add-Type -MemberDefinition $code -Name "NativeMethods" -Namespace "Win32" -PassThru
+  $HWND_BROADCAST = [IntPtr]0xffff
+  $WM_SETTINGCHANGE = 0x001a
+  $result = [UIntPtr]::Zero
+  $type::SendMessageTimeout($HWND_BROADCAST, $WM_SETTINGCHANGE, [UIntPtr]::Zero, "Environment", 2, 5000, [ref]$result) | Out-Null
+}
+
 Write-Section "Windows Terminal"
-# Terminal settings (after Windows Terminal install)
+# ...
 Set-WindowsTerminalFontAndDefaultProfile
 
 # Final PATH check for WinGet and NPM
@@ -234,6 +251,7 @@ try {
     [Environment]::SetEnvironmentVariable("Path", "$userPath;$wingetLinks", "User")
     Write-Info "Added WinGet links to PATH."
   }
+  Update-Environment
 } catch {}
 
 Write-Host ""
