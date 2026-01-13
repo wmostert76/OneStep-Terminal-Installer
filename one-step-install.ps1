@@ -185,8 +185,20 @@ Write-Section "NPM Global Tools"
 # NPM global packages (after Node is present)
 try {
   if (Get-Command npm -ErrorAction SilentlyContinue) {
+    Write-Info "Installing global NPM tools..."
     npm install -g npm@11.7.0 | Out-Host
     npm install -g @google/gemini-cli@0.23.0 @openai/codex@0.80.0 opencode-ai@1.1.13 opencode-windows-x64@1.1.13 | Out-Host
+
+    # Ensure npm global bin is in PATH
+    $npmPrefix = (npm config get prefix).Trim()
+    if ($npmPrefix) {
+      $currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
+      if ($currentPath -notlike "*$npmPrefix*") {
+        Write-Info "Adding $npmPrefix to User PATH..."
+        [Environment]::SetEnvironmentVariable("Path", "$currentPath;$npmPrefix", "User")
+        $env:Path += ";$npmPrefix"
+      }
+    }
   }
 } catch {
   Write-Warning "Could not install NPM tools: $_"
@@ -202,6 +214,19 @@ Write-Section "Windows Terminal"
 # Terminal settings (after Windows Terminal install)
 Set-WindowsTerminalFontAndDefaultProfile
 
+# Final PATH check for WinGet and NPM
+try {
+  $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+  $wingetLinks = Join-Path $env:LOCALAPPDATA "Microsoft\WinGet\Links"
+  if ((Test-Path $wingetLinks) -and ($userPath -notlike "*$wingetLinks*")) {
+    [Environment]::SetEnvironmentVariable("Path", "$userPath;$wingetLinks", "User")
+    Write-Info "Added WinGet links to PATH."
+  }
+} catch {}
+
 Write-Host ""
 Write-Host "Done." -ForegroundColor Green
+Write-Host "CRITICAL: Please close and RESTART your terminal to apply PATH changes." -ForegroundColor Yellow
+Write-Info "After restart, you can run 'gemini', 'codex', or 'opencode' immediately."
 Write-Info "Restart Windows Terminal or run . `$PROFILE in each shell."
+
