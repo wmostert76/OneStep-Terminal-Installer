@@ -41,9 +41,16 @@ function Install-WingetPkg($id) {
 }
 
 function Ensure-NuGetProvider {
-  $prov = Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue
-  if (-not $prov -or $prov.Version -lt [version]'2.8.5.201') {
-    Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope CurrentUser | Out-Host
+  try {
+    # Ensure TLS 1.2 is available for downloads
+    [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072
+    $prov = Get-PackageProvider -Name NuGet -ListAvailable -ErrorAction SilentlyContinue | Where-Object { $_.Version -ge [version]'2.8.5.201' }
+    if (-not $prov) {
+      Write-Info "Installing NuGet provider..."
+      Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Confirm:$false -Scope CurrentUser | Out-Null
+    }
+  } catch {
+    Write-Warning "Could not ensure NuGet provider: $_"
   }
 }
 
@@ -107,7 +114,7 @@ function Update-Profile($profilePath, $shellInitLine) {
   if (-not ($lines -match 'Import-Module Terminal-Icons')) { $lines += 'Import-Module Terminal-Icons' }
 
   # zoxide
-  if (-not ($lines -match 'zoxide init')) { $lines += 'zoxide init powershell | Invoke-Expression' }
+  if (-not ($lines -match 'zoxide init')) { $lines += 'zoxide init powershell | Out-String | Invoke-Expression' }
 
   Set-Content -Path $profilePath -Value $lines
   Write-Host "Updated profile: $profilePath"
@@ -116,8 +123,12 @@ function Update-Profile($profilePath, $shellInitLine) {
 Write-Section "Preflight"
 Ensure-Winget
 Write-Ok "winget ready"
-Set-ExecutionPolicy Unrestricted -Scope LocalMachine -Force
-Write-Ok "Execution policy set to Unrestricted"
+try {
+  Set-ExecutionPolicy Unrestricted -Scope CurrentUser -Force
+  Write-Ok "Execution policy set to Unrestricted (CurrentUser)"
+} catch {
+  Write-Warning "Could not set execution policy: $_"
+}
 
 Write-Section "Install Apps"
 # Install apps in a stable order
@@ -141,24 +152,32 @@ $wingetIds | ForEach-Object { Install-WingetPkg $_ }
 Write-Section "PowerShell Modules"
 # PowerShell modules (avoid NuGet prompt)
 Ensure-NuGetProvider
-powershell -NoProfile -Command "Install-Module PSReadLine -Scope CurrentUser -Force" | Out-Host
-powershell -NoProfile -Command "Install-Module Terminal-Icons -Scope CurrentUser -Force" | Out-Host
-if (Test-Path 'C:\Program Files\PowerShell\7\pwsh.exe') {
-  & "C:\Program Files\PowerShell\7\pwsh.exe" -NoProfile -Command "Install-Module Terminal-Icons -Scope CurrentUser -Force" | Out-Host
+try {
+  powershell -NoProfile -Command "Install-Module PSReadLine -Scope CurrentUser -Force" | Out-Host
+  powershell -NoProfile -Command "Install-Module Terminal-Icons -Scope CurrentUser -Force" | Out-Host
+  if (Test-Path 'C:\Program Files\PowerShell\7\pwsh.exe') {
+    & "C:\Program Files\PowerShell\7\pwsh.exe" -NoProfile -Command "Install-Module Terminal-Icons -Scope CurrentUser -Force" | Out-Host
+  }
+} catch {
+  Write-Warning "Could not install PowerShell modules: $_"
 }
 
 Write-Section "NPM Global Tools"
 # NPM global packages (after Node is present)
-if (Get-Command npm -ErrorAction SilentlyContinue) {
-  npm install -g npm@11.7.0 | Out-Host
-  npm install -g @google/gemini-cli@0.23.0 @openai/codex@0.80.0 opencode-ai@1.1.13 opencode-windows-x64@1.1.13 | Out-Host
+try {
+  if (Get-Command npm -ErrorAction SilentlyContinue) {
+    npm install -g npm@11.7.0 | Out-Host
+    npm install -g @google/gemini-cli@0.23.0 @openai/codex@0.80.0 opencode-ai@1.1.13 opencode-windows-x64@1.1.13 | Out-Host
+  }
+} catch {
+  Write-Warning "Could not install NPM tools: $_"
 }
 
 Write-Section "Shell Theme + Profiles"
 # Configure themes and profiles
 $themePath = Ensure-ThemeFile
-Update-Profile "$env:USERPROFILE\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1" "oh-my-posh init powershell --config `"$themePath`" | Invoke-Expression"
-Update-Profile "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1" "oh-my-posh init pwsh --config `"$themePath`" | Invoke-Expression"
+Update-Profile "$env:USERPROFILE\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1" "oh-my-posh init powershell --config `"$themePath`" | Out-String | Invoke-Expression"
+Update-Profile "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1" "oh-my-posh init pwsh --config `"$themePath`" | Out-String | Invoke-Expression"
 
 Write-Section "Windows Terminal"
 # Terminal settings (after Windows Terminal install)
