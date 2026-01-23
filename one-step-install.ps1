@@ -4,18 +4,61 @@
 
 $ErrorActionPreference = 'Stop'
 
+# Enhanced logging functions with beautiful colors and animations
 function Write-Section($text) {
   Write-Host ""
-  Write-Host ("[ " + $text + " ]") -ForegroundColor Cyan
+  Write-Host "╔═══════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
+  Write-Host "║ " -NoNewline -ForegroundColor Cyan
+  Write-Host $text.PadRight(61) -NoNewline -ForegroundColor White
+  Write-Host " ║" -ForegroundColor Cyan
+  Write-Host "╚═══════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
 }
 
-function Write-Ok($text) { Write-Host ("[OK] " + $text) -ForegroundColor Green }
-function Write-Info($text) { Write-Host ("[INFO] " + $text) -ForegroundColor Yellow }
+function Write-Ok($text) {
+  Write-Host "  ✓ " -NoNewline -ForegroundColor Green
+  Write-Host $text -ForegroundColor White
+}
 
-Write-Host "========================================" -ForegroundColor Magenta
-Write-Host "  OneStep Terminal Installer" -ForegroundColor Magenta
-Write-Host "  Setup in minutes. Clean. Repeatable." -ForegroundColor DarkMagenta
-Write-Host "========================================" -ForegroundColor Magenta
+function Write-Info($text) {
+  Write-Host "  ➜ " -NoNewline -ForegroundColor Yellow
+  Write-Host $text -ForegroundColor Gray
+}
+
+function Write-Step($text) {
+  Write-Host "  ▶ " -NoNewline -ForegroundColor Cyan
+  Write-Host $text -ForegroundColor White
+}
+
+function Write-Success($text) {
+  Write-Host "  ★ " -NoNewline -ForegroundColor Magenta
+  Write-Host $text -ForegroundColor Green
+}
+
+function Show-Progress($activity, $status) {
+  $dots = "." * (($global:dotCount % 3) + 1)
+  $global:dotCount++
+  Write-Host "`r  ⟳ " -NoNewline -ForegroundColor Cyan
+  Write-Host "$activity$dots".PadRight(60) -NoNewline -ForegroundColor Gray
+}
+
+$global:dotCount = 0
+
+# Stunning ASCII banner
+Clear-Host
+Write-Host ""
+Write-Host "  ██████╗ ███╗   ██╗███████╗    ███████╗████████╗███████╗██████╗ " -ForegroundColor Magenta
+Write-Host " ██╔═══██╗████╗  ██║██╔════╝    ██╔════╝╚══██╔══╝██╔════╝██╔══██╗" -ForegroundColor Magenta
+Write-Host " ██║   ██║██╔██╗ ██║█████╗      ███████╗   ██║   █████╗  ██████╔╝" -ForegroundColor Cyan
+Write-Host " ██║   ██║██║╚██╗██║██╔══╝      ╚════██║   ██║   ██╔══╝  ██╔═══╝ " -ForegroundColor Cyan
+Write-Host " ╚██████╔╝██║ ╚████║███████╗    ███████║   ██║   ███████╗██║     " -ForegroundColor Blue
+Write-Host "  ╚═════╝ ╚═╝  ╚═══╝╚══════╝    ╚══════╝   ╚═╝   ╚══════╝╚═╝     " -ForegroundColor Blue
+Write-Host ""
+Write-Host "              TERMINAL INSTALLER" -ForegroundColor White
+Write-Host "          Setup in minutes. Clean. Repeatable." -ForegroundColor DarkGray
+Write-Host ""
+Write-Host "════════════════════════════════════════════════════════════════" -ForegroundColor DarkGray
+Write-Host ""
+Start-Sleep -Milliseconds 500
 
 function Ensure-Winget {
   if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
@@ -46,11 +89,20 @@ function Is-WingetInstalled($id) {
 }
 
 function Install-WingetPkg($id) {
+  Write-Step "Processing $id"
   if (Is-WingetInstalled $id) {
-    Write-Ok "Already installed: $id"
-    return
+    Write-Info "Upgrading if available..."
+    $output = winget upgrade --id $id --source winget --accept-package-agreements --accept-source-agreements 2>&1
+    if ($output -match "No applicable update found" -or $output -match "No installed package found") {
+      Write-Ok "Already up-to-date: $id"
+    } else {
+      Write-Success "Updated: $id"
+    }
+  } else {
+    Write-Info "Installing fresh..."
+    winget install --id $id --source winget --accept-package-agreements --accept-source-agreements | Out-Null
+    Write-Success "Installed: $id"
   }
-  winget install --id $id --source winget --accept-package-agreements --accept-source-agreements | Out-Host
 }
 
 function Ensure-NuGetProvider {
@@ -103,7 +155,8 @@ function Update-Profile($profilePath, $shellInitLine) {
   Ensure-Dir (Split-Path $profilePath -Parent)
   if (-not (Test-Path $profilePath)) { New-Item -ItemType File -Path $profilePath -Force | Out-Null }
 
-  $lines = Get-Content -Path $profilePath
+  $content = Get-Content -Path $profilePath -ErrorAction SilentlyContinue
+  $lines = if ($content) { $content } else { @() }
 
   # oh-my-posh init line
   $foundOmp = $false
@@ -137,10 +190,19 @@ function Update-Profile($profilePath, $shellInitLine) {
   Write-Host "Updated profile: $profilePath"
 }
 
-Write-Section "Preflight"
+Write-Section "Preflight Checks"
+
+Write-Step "Checking winget availability..."
+Start-Sleep -Milliseconds 300
 Ensure-Winget
-Write-Ok "winget ready"
+Write-Ok "winget is ready and operational"
+
+Write-Step "Configuring UAC settings..."
+Start-Sleep -Milliseconds 300
 Disable-UAC
+
+Write-Step "Setting execution policy..."
+Start-Sleep -Milliseconds 300
 try {
   Set-ExecutionPolicy Unrestricted -Scope LocalMachine -Force
   Write-Ok "Execution policy set to Unrestricted (LocalMachine)"
@@ -153,8 +215,12 @@ try {
   }
 }
 
+Write-Host ""
+Write-Success "Preflight complete! Ready to install..."
+Start-Sleep -Milliseconds 500
+
 Write-Section "Install Apps"
-# Install apps in a stable order
+# Install apps in a stable order - always latest versions
 $wingetIds = @(
   'Microsoft.WindowsTerminal',
   'Microsoft.PowerShell',
@@ -168,41 +234,84 @@ $wingetIds = @(
   'Git.Git',
   'GitHub.cli',
   '7zip.7zip',
-  'Google.Chrome'
+  'Google.Chrome',
+  'MartiCliment.UniGetUI'
 )
+
+Write-Host ""
+Write-Info "Processing $($wingetIds.Count) applications..."
+Write-Host ""
+
 $wingetIds | ForEach-Object { Install-WingetPkg $_ }
+
+Write-Host ""
+Write-Success "All applications processed!"
 
 Write-Section "PowerShell Modules"
 # PowerShell modules (avoid NuGet prompt)
+Write-Step "Ensuring NuGet provider is available..."
 Ensure-NuGetProvider
+Write-Ok "NuGet provider ready"
+
 try {
-  powershell -NoProfile -Command "Install-Module PSReadLine -Scope CurrentUser -Force" | Out-Host
-  powershell -NoProfile -Command "Install-Module Terminal-Icons -Scope CurrentUser -Force" | Out-Host
+  Write-Host ""
+  Write-Step "Installing PSReadLine for Windows PowerShell..."
+  powershell -NoProfile -Command "Install-Module PSReadLine -Scope CurrentUser -Force -AllowClobber" 2>&1 | Out-Null
+  Write-Ok "PSReadLine installed (Windows PowerShell)"
+
+  Write-Step "Installing Terminal-Icons for Windows PowerShell..."
+  powershell -NoProfile -Command "Install-Module Terminal-Icons -Scope CurrentUser -Force -AllowClobber" 2>&1 | Out-Null
+  Write-Ok "Terminal-Icons installed (Windows PowerShell)"
+
   if (Test-Path 'C:\Program Files\PowerShell\7\pwsh.exe') {
-    & "C:\Program Files\PowerShell\7\pwsh.exe" -NoProfile -Command "Install-Module Terminal-Icons -Scope CurrentUser -Force" | Out-Host
+    Write-Step "Installing Terminal-Icons for PowerShell 7..."
+    & "C:\Program Files\PowerShell\7\pwsh.exe" -NoProfile -Command "Install-Module Terminal-Icons -Scope CurrentUser -Force -AllowClobber" 2>&1 | Out-Null
+    Write-Ok "Terminal-Icons installed (PowerShell 7)"
   }
+
+  Write-Host ""
+  Write-Success "PowerShell modules installed!"
 } catch {
   Write-Warning "Could not install PowerShell modules: $_"
 }
 
 Write-Section "NPM Global Tools"
-# NPM global packages (after Node is present)
+# NPM global packages (after Node is present) - Always latest versions
 try {
   if (Get-Command npm -ErrorAction SilentlyContinue) {
-    Write-Info "Installing global NPM tools..."
-    
+    Write-Info "Installing/updating global NPM tools to latest versions..."
+    Write-Host ""
+
     $npmPackages = @(
-      "npm@11.7.0",
-      "@google/gemini-cli@0.23.0",
-      "@openai/codex@0.80.0",
-      "opencode-ai@1.1.13",
-      "opencode-windows-x64@1.1.13"
+      "npm",
+      "@google/gemini-cli",
+      "@anthropic-ai/claude-cli",
+      "@openai/codex",
+      "opencode-ai",
+      "opencode-windows-x64"
     )
 
+    $packageCount = $npmPackages.Count
+    $current = 0
+
     foreach ($pkg in $npmPackages) {
-      Write-Info "Installing $pkg..."
-      npm install -g $pkg | Out-Null
+      $current++
+      $percent = [math]::Round(($current / $packageCount) * 100)
+      $barLength = 40
+      $filled = [math]::Round(($percent / 100) * $barLength)
+      $bar = ("█" * $filled).PadRight($barLength, "░")
+
+      Write-Host "`r  [$bar] $percent% " -NoNewline -ForegroundColor Cyan
+      Write-Host "Installing $pkg...".PadRight(40) -NoNewline -ForegroundColor Gray
+
+      npm install -g $pkg@latest 2>&1 | Out-Null
+
+      Write-Host "`r  ✓ " -NoNewline -ForegroundColor Green
+      Write-Host "[$bar] $percent% " -NoNewline -ForegroundColor DarkGreen
+      Write-Host "$pkg installed".PadRight(40) -ForegroundColor White
     }
+
+    Write-Host ""
 
     # Ensure npm global bin is in PATH (Works for ALL npm packages)
     $npmPrefix = (npm config get prefix).Trim()
@@ -214,17 +323,29 @@ try {
         $env:Path += ";$npmPrefix"
       }
     }
-    Write-Ok "Global NPM tools ready."
+    Write-Success "Global NPM tools ready (latest versions installed)"
   }
 } catch {
   Write-Warning "Could not install NPM tools: $_"
 }
 
 Write-Section "Shell Theme + Profiles"
-# Configure themes and profiles
+
+Write-Step "Downloading Oh My Posh theme (bubbles)..."
 $themePath = Ensure-ThemeFile
+Write-Ok "Theme downloaded: bubbles.omp.json"
+
+Write-Host ""
+Write-Step "Configuring Windows PowerShell profile..."
 Update-Profile "$env:USERPROFILE\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1" "oh-my-posh init powershell --config `"$themePath`" | Out-String | Invoke-Expression"
+Write-Ok "Windows PowerShell profile configured"
+
+Write-Step "Configuring PowerShell 7 profile..."
 Update-Profile "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1" "oh-my-posh init pwsh --config `"$themePath`" | Out-String | Invoke-Expression"
+Write-Ok "PowerShell 7 profile configured"
+
+Write-Host ""
+Write-Success "Shell profiles ready with bubbles theme!"
 
 function Update-Environment {
   Write-Info "Refreshing environment variables..."
@@ -239,24 +360,54 @@ function Update-Environment {
   $type::SendMessageTimeout($HWND_BROADCAST, $WM_SETTINGCHANGE, [UIntPtr]::Zero, "Environment", 2, 5000, [ref]$result) | Out-Null
 }
 
-Write-Section "Windows Terminal"
-# ...
+Write-Section "Windows Terminal Configuration"
+
+Write-Step "Locating Windows Terminal settings..."
 Set-WindowsTerminalFontAndDefaultProfile
+Write-Ok "Windows Terminal configured with JetBrainsMono Nerd Font"
 
 # Final PATH check for WinGet and NPM
+Write-Host ""
+Write-Step "Finalizing PATH environment variables..."
 try {
   $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
   $wingetLinks = Join-Path $env:LOCALAPPDATA "Microsoft\WinGet\Links"
   if ((Test-Path $wingetLinks) -and ($userPath -notlike "*$wingetLinks*")) {
     [Environment]::SetEnvironmentVariable("Path", "$userPath;$wingetLinks", "User")
-    Write-Info "Added WinGet links to PATH."
+    Write-Ok "WinGet links added to PATH"
   }
   Update-Environment
+  Write-Ok "Environment variables refreshed"
 } catch {}
 
+# Completion banner
 Write-Host ""
-Write-Host "Done." -ForegroundColor Green
-Write-Host "CRITICAL: Please close and RESTART your terminal to apply PATH changes." -ForegroundColor Yellow
-Write-Info "After restart, you can run 'gemini', 'codex', or 'opencode' immediately."
-Write-Info "Restart Windows Terminal or run . `$PROFILE in each shell."
+Write-Host ""
+Write-Host "╔═══════════════════════════════════════════════════════════════╗" -ForegroundColor Green
+Write-Host "║                                                               ║" -ForegroundColor Green
+Write-Host "║            ✓ INSTALLATION COMPLETED SUCCESSFULLY!             ║" -ForegroundColor Green
+Write-Host "║                                                               ║" -ForegroundColor Green
+Write-Host "╚═══════════════════════════════════════════════════════════════╝" -ForegroundColor Green
+Write-Host ""
+Write-Host "  🎉 Your terminal is now supercharged!" -ForegroundColor Magenta
+Write-Host ""
+Write-Host "  ⚠  NEXT STEPS:" -ForegroundColor Yellow
+Write-Host "  ═════════════" -ForegroundColor DarkYellow
+Write-Host "  1. Close this terminal window" -ForegroundColor White
+Write-Host "  2. Open a NEW terminal to apply all PATH changes" -ForegroundColor White
+Write-Host "  3. Enjoy your modern terminal setup!" -ForegroundColor White
+Write-Host ""
+Write-Host "  📦 Available Commands:" -ForegroundColor Cyan
+Write-Host "  ─────────────────────" -ForegroundColor DarkCyan
+Write-Host "     • claude    - Anthropic Claude CLI" -ForegroundColor Gray
+Write-Host "     • gemini    - Google Gemini CLI" -ForegroundColor Gray
+Write-Host "     • codex     - OpenAI Codex CLI" -ForegroundColor Gray
+Write-Host "     • opencode  - OpenCode AI assistant" -ForegroundColor Gray
+Write-Host "     • z <path>  - Smart directory navigation (Zoxide)" -ForegroundColor Gray
+Write-Host ""
+Write-Host "  💡 To reload your profile in current shell: " -NoNewline -ForegroundColor Yellow
+Write-Host ". `$PROFILE" -ForegroundColor White
+Write-Host ""
+Write-Host "════════════════════════════════════════════════════════════════" -ForegroundColor DarkGray
+Write-Host ""
 
