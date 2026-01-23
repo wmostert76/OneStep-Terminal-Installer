@@ -235,7 +235,8 @@ $wingetIds = @(
   'GitHub.cli',
   '7zip.7zip',
   'Google.Chrome',
-  'MartiCliment.UniGetUI'
+  'MartiCliment.UniGetUI',
+  'EpicGames.EpicGamesLauncher'
 )
 
 Write-Host ""
