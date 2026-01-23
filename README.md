@@ -86,7 +86,6 @@ irm "https://raw.githubusercontent.com/wmostert76/OneStep-Terminal-Installer/mas
 | `7zip.7zip` | File compression |
 | `Google.Chrome` | Web browser |
 | `MartiCliment.UniGetUI` | Package manager GUI |
-| `EpicGames.EpicGamesLauncher` | Epic Games Store & launcher |
 
 ### NPM Global Packages (Always Latest)
 | Package | Purpose |
