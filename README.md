@@ -1,29 +1,8 @@
-# 🚀 OneStep Terminal Installer
+# OneStep Terminal Installer
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/wmostert76/OneStep-Terminal-Installer/master/assets/hero-v2.svg" alt="OneStep Terminal Installer" width="860" />
-</p>
+A clean, repeatable, one-step installer for your Windows terminal setup. Transforms your Windows terminal into a modern, AI-powered development environment in minutes.
 
-<p align="center">
-  <img alt="PowerShell" src="https://img.shields.io/badge/PowerShell-5.1%20%7C%207%2B-5391FE?logo=powershell&logoColor=white">
-  <img alt="Windows" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D6?logo=windows&logoColor=white">
-  <img alt="License" src="https://img.shields.io/badge/License-MIT-2EA44F">
-  <img alt="Updates" src="https://img.shields.io/badge/Updates-Always%20Latest-brightgreen">
-</p>
-
-```
-  ██████╗ ███╗   ██╗███████╗    ███████╗████████╗███████╗██████╗
- ██╔═══██╗████╗  ██║██╔════╝    ██╔════╝╚══██╔══╝██╔════╝██╔══██╗
- ██║   ██║██╔██╗ ██║█████╗      ███████╗   ██║   █████╗  ██████╔╝
- ██║   ██║██║╚██╗██║██╔══╝      ╚════██║   ██║   ██╔══╝  ██╔═══╝
- ╚██████╔╝██║ ╚████║███████╗    ███████║   ██║   ███████╗██║
-  ╚═════╝ ╚═╝  ╚═══╝╚══════╝    ╚══════╝   ╚═╝   ╚══════╝╚═╝
-```
-
-### ✨ A clean, repeatable, one-step installer for your terminal setup
-**Transforms your Windows terminal into a modern, AI-powered development environment in minutes!**
-
-## ⚡ Quick Start
+## Quick Start
 
 **One command. That's it.**
 
@@ -31,43 +10,46 @@
 irm "https://raw.githubusercontent.com/wmostert76/OneStep-Terminal-Installer/master/one-step-install.ps1" | iex
 ```
 
-> 🎯 **Safe to run multiple times** - The installer intelligently updates existing installations!
+> Safe to run multiple times - The installer intelligently updates existing installations!
 
 ---
 
-## 🎁 What You Get
+## What You Get
 
-### 🖥️ Terminal Experience
-- ✅ **Windows Terminal** with JetBrainsMono Nerd Font as default
-- ✅ **PowerShell 7** + Windows PowerShell profiles perfectly aligned
-- ✅ **Oh My Posh** with the stunning bubbles theme
-- ✅ **Terminal-Icons** for beautiful directory listings
-- ✅ **Smart history suggestions** with list view
+### Terminal Experience
+- **Windows Terminal** with JetBrainsMono Nerd Font
+- **PowerShell 7** set as default profile
+- **Oh My Posh** with bubbles theme
+- **Terminal-Icons** for beautiful directory listings
+- **Smart history suggestions** with list view
+- **Always runs as Administrator** by default
 
-### 🤖 AI-Powered CLI Tools
-- 🧠 **Claude CLI** - Anthropic's Claude assistant (@anthropic-ai/claude-cli)
-- 💎 **Gemini CLI** - Google's Gemini assistant (@google/gemini-cli)
-- 🎨 **Codex CLI** - OpenAI's Codex assistant (@openai/codex)
-- 🚀 **OpenCode** - AI coding assistant (opencode-ai)
+### AI-Powered CLI Tools
+- **Claude Code** - Anthropic's Claude assistant (`claude`)
+- **Gemini CLI** - Google's Gemini assistant (`gemini`)
+- **Codex CLI** - OpenAI's Codex assistant (`codex`)
+- **OpenCode** - AI coding assistant (`opencode`)
 
-### 🛠️ Development Tools
-- 📁 **Zoxide** - Smarter cd navigation (`z` command)
-- 📦 **Node.js LTS** + latest npm
-- 🐍 **Python 3.12** with launcher
-- 🔧 **Git** + GitHub CLI
-- 🗜️ **7-Zip** compression utility
-- 📂 **Midnight Commander** file manager
-- 🌐 **Google Chrome** browser
-- 🎛️ **UniGetUI** - Universal package manager GUI
+### Development Tools
+- **Zoxide** - Smarter cd navigation (`z` command)
+- **Node.js LTS** + latest npm
+- **Python 3.12** with launcher
+- **Git** + GitHub CLI
+- **7-Zip** compression utility
+- **Midnight Commander** file manager
+- **Google Chrome** browser
+- **UniGetUI** - Universal package manager GUI
 
-### ⚙️ System Configuration
-- 🔓 **UAC disabled** (requires reboot)
-- 🔐 **Execution Policy** set to Unrestricted
-- 🌍 **PATH configured** for all tools automatically
+### Windows Customization
+- **Dark Mode** enabled system-wide
+- **Taskbar cleaned up** - Search, Task View, Widgets, Copilot, Chat hidden
+- **Chrome set as default browser**
+- **Edge shortcuts removed** from desktop
+- **UAC disabled** for smoother workflow
 
 ---
 
-## 📦 Complete Package List
+## Package List
 
 ### WinGet Packages (Always Latest)
 | Package | Purpose |
@@ -88,122 +70,108 @@ irm "https://raw.githubusercontent.com/wmostert76/OneStep-Terminal-Installer/mas
 | `MartiCliment.UniGetUI` | Package manager GUI |
 
 ### NPM Global Packages (Always Latest)
-| Package | Purpose |
-|---------|---------|
-| `npm` | Package manager itself |
-| `@anthropic-ai/claude-cli` | Claude AI assistant |
-| `@google/gemini-cli` | Gemini AI assistant |
-| `@openai/codex` | OpenAI Codex assistant |
-| `opencode-ai` | OpenCode AI tool |
-| `opencode-windows-x64` | OpenCode Windows binary |
+| Package | Command | Purpose |
+|---------|---------|---------|
+| `@anthropic-ai/claude-code` | `claude` | Claude AI assistant |
+| `@google/gemini-cli` | `gemini` | Gemini AI assistant |
+| `@openai/codex` | `codex` | OpenAI Codex assistant |
+| `opencode-ai` | `opencode` | OpenCode AI tool |
+| `opencode-windows-x64` | - | OpenCode Windows binary |
 
 ### PowerShell Modules
-- `PSReadLine` - Enhanced command line editing
-- `Terminal-Icons` - File and folder icons
+- `PSReadLine` - Enhanced command line editing with history suggestions
+- `Terminal-Icons` - File and folder icons in terminal
 
 ---
 
-## 🔧 System Changes
+## Windows Customization Details
+
+| Setting | Value |
+|---------|-------|
+| **Theme** | Dark Mode (Apps + System) |
+| **Search Box** | Hidden |
+| **Task View** | Hidden |
+| **Widgets** | Disabled |
+| **Copilot Button** | Hidden |
+| **Chat Icon** | Hidden |
+| **Default Browser** | Chrome |
+| **Terminal Elevation** | Always Administrator |
+
+### Taskbar Pinning (Manual Step)
+Windows 11 blocks programmatic taskbar pinning. After installation, manually pin:
+1. Press `Win`, type `Chrome`, right-click > **Pin to taskbar**
+2. Press `Win`, type `Terminal`, right-click > **Pin to taskbar**
+
+---
+
+## System Changes
 
 | Change | Details |
 |--------|---------|
-| **Execution Policy** | Sets `LocalMachine` (or `CurrentUser` fallback) to `Unrestricted` |
-| **UAC** | Disables User Account Control via registry (⚠️ requires reboot) |
-| **Terminal Font** | JetBrainsMono Nerd Font set as default |
-| **Default Profile** | PowerShell 7 set as default shell |
-| **PATH Variables** | npm global and WinGet Links added automatically |
+| **Execution Policy** | `Unrestricted` (LocalMachine or CurrentUser) |
+| **UAC** | Disabled via registry (requires reboot) |
+| **Terminal Font** | JetBrainsMono Nerd Font |
+| **Default Profile** | PowerShell 7 |
+| **Terminal Elevation** | `elevate: true` in settings |
+| **PATH Variables** | npm global and WinGet Links added |
 
 ---
 
-## 🎨 Customization
+## Customization
 
-The installer is highly customizable! Edit `one-step-install.ps1` to personalize:
+Edit `one-step-install.ps1` to personalize:
 
-### 📝 Common Customizations
-
-**Add/Remove Applications** (Line ~195)
+### Add/Remove Applications
 ```powershell
 $wingetIds = @(
   'Microsoft.WindowsTerminal',
-  'YourApp.PackageId'  # Add your favorite apps
+  'YourApp.PackageId'  # Add your apps
 )
 ```
 
-**Change AI Tools** (Line ~230)
+### Change AI Tools
 ```powershell
 $npmPackages = @(
-  "@anthropic-ai/claude-cli",
-  "your-favorite-npm-tool"  # Add more npm packages
+  "@anthropic-ai/claude-code",
+  "your-npm-tool"  # Add more
 )
 ```
 
-**Change Oh My Posh Theme** (Line ~97)
-```powershell
-# Replace URL with any theme from https://ohmyposh.dev/docs/themes
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/.../your-theme.omp.json"
-```
-
-**Adjust History Size** (Line ~120)
-```powershell
-Set-PSReadLineOption -MaximumHistoryCount 50  # Change from 10 to any number
-```
+### Change Oh My Posh Theme
+Browse themes at https://ohmyposh.dev/docs/themes and update the URL in `Ensure-ThemeFile` function.
 
 ---
 
-## 💡 Usage Tips
+## Usage Tips
 
 ### First Run
-1. **Close your terminal** after installation completes
-2. **Open a NEW terminal** to apply PATH changes
-3. **Test AI commands**: Try `claude`, `gemini`, or `codex`
-4. **Navigate smartly**: Use `z <directory>` instead of `cd`
+1. Close your terminal after installation
+2. Open a NEW terminal to apply PATH changes
+3. Test AI commands: `claude`, `gemini`, `codex`
+4. Navigate smartly: `z <directory>` instead of `cd`
 
-### Updating Your Setup
-**Just re-run the installer!** It safely:
-- ✅ Updates all packages to latest versions
-- ✅ Preserves your customizations
-- ✅ Fixes any broken configurations
-- ✅ Adds new tools from updated script
+### Updating
+Just re-run the installer! It safely:
+- Updates all packages to latest versions
+- Preserves your customizations
+- Fixes broken configurations
 
 ### Troubleshooting
 
 | Issue | Solution |
 |-------|----------|
-| PSReadLine in use | Restart PowerShell and re-run installer |
+| PSReadLine error | Restart PowerShell and re-run |
 | Fonts not showing | Restart Windows Terminal |
-| Commands not found | Close and reopen terminal (PATH update needed) |
-| npm tools missing | Run installer again - it will fix PATH automatically |
+| Commands not found | Close and reopen terminal |
+| Taskbar icons missing | Manual pin (Windows 11 limitation) |
+| Widgets still visible | Toggle off in Settings > Taskbar |
 
 ---
 
-## 🌟 Features Highlight
-
-### Beautiful Installation Experience
-- 🎨 Colorful ASCII art banner
-- 📊 Progress bars for package installation
-- ✓ Clear success/failure indicators
-- 📝 Detailed logging with emoji indicators
-
-### Smart & Safe
-- 🔄 **Idempotent**: Safe to run multiple times
-- 🆙 **Auto-updates**: Always gets latest versions
-- 🛡️ **Non-destructive**: Preserves user configurations where possible
-- ⚡ **Fast**: Parallel operations where applicable
-
----
-
-## 📄 License
+## License
 
 MIT License - Feel free to use, modify, and distribute!
 
----
-
-## 🤝 Contributing
+## Contributing
 
 Found a bug? Want to add a feature? PRs welcome!
-
-## ⭐ Show Your Support
-
-If this saved you time, give it a star! ⭐
-
-
