@@ -138,12 +138,22 @@ function Set-WindowsTerminalFontAndDefaultProfile {
 }
 
 function Ensure-ThemeFile {
+  # Primary location in user profile
   $themesDir = "$env:USERPROFILE\.poshthemes"
   Ensure-Dir $themesDir
   $themeFilePath = Join-Path $themesDir 'bubbles.omp.json'
   if (-not (Test-Path $themeFilePath)) {
     Invoke-WebRequest -Uri "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/bubbles.omp.json" -OutFile $themeFilePath
   }
+
+  # Also ensure theme exists in standard oh-my-posh themes location (for WindowsApps installs)
+  $standardThemesDir = "$env:LOCALAPPDATA\Programs\oh-my-posh\themes"
+  Ensure-Dir $standardThemesDir
+  $standardThemePath = Join-Path $standardThemesDir 'bubbles.omp.json'
+  if (-not (Test-Path $standardThemePath)) {
+    Copy-Item -Path $themeFilePath -Destination $standardThemePath -Force
+  }
+
   return $themeFilePath
 }
 
@@ -174,6 +184,18 @@ function Update-Profile($profilePath, $shellInitLine) {
 
   # Terminal-Icons
   if (-not ($lines -match 'Import-Module Terminal-Icons')) { $lines += 'Import-Module Terminal-Icons' }
+
+  # posh-git for Git integration
+  if (-not ($lines -match 'Import-Module posh-git')) { $lines += 'Import-Module posh-git' }
+
+  # PSFzf for fuzzy finding (requires fzf binary)
+  if (-not ($lines -match 'Import-Module PSFzf')) {
+    $lines += 'Import-Module PSFzf'
+    $lines += "Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' -PSReadlineChordReverseHistory 'Ctrl+r'"
+  }
+
+  # z module for directory jumping
+  if (-not ($lines -match 'Import-Module z')) { $lines += 'Import-Module z' }
 
   # Ensure npm global path is in session
   $npmPathLine = '$npmPrefix = (npm config get prefix).Trim(); if ($npmPrefix -and $env:Path -notlike "*$npmPrefix*") { $env:Path += ";$npmPrefix" }'
@@ -226,6 +248,7 @@ $wingetIds = @(
   'DEVCOM.JetBrainsMonoNerdFont',
   'JanDeDobbeleer.OhMyPosh',
   'ajeetdsouza.zoxide',
+  'junegunn.fzf',
   'GNU.MidnightCommander',
   'Git.Git',
   'GitHub.cli',
@@ -288,18 +311,23 @@ Write-Ok "NuGet provider ready"
 
 try {
   Write-Host ""
-  Write-Step "Installing PSReadLine for Windows PowerShell..."
-  powershell -NoProfile -Command "Install-Module PSReadLine -Scope CurrentUser -Force -AllowClobber" 2>&1 | Out-Null
-  Write-Ok "PSReadLine installed (Windows PowerShell)"
+  # Modules to install for both Windows PowerShell and PowerShell 7
+  $psModules = @('PSReadLine', 'Terminal-Icons', 'posh-git', 'PSFzf', 'z')
 
-  Write-Step "Installing Terminal-Icons for Windows PowerShell..."
-  powershell -NoProfile -Command "Install-Module Terminal-Icons -Scope CurrentUser -Force -AllowClobber" 2>&1 | Out-Null
-  Write-Ok "Terminal-Icons installed (Windows PowerShell)"
+  Write-Step "Installing modules for Windows PowerShell..."
+  foreach ($mod in $psModules) {
+    Write-Info "  Installing $mod..."
+    powershell -NoProfile -Command "Install-Module $mod -Scope CurrentUser -Force -AllowClobber -ErrorAction SilentlyContinue" 2>&1 | Out-Null
+  }
+  Write-Ok "Windows PowerShell modules installed"
 
   if (Test-Path 'C:\Program Files\PowerShell\7\pwsh.exe') {
-    Write-Step "Installing Terminal-Icons for PowerShell 7..."
-    & "C:\Program Files\PowerShell\7\pwsh.exe" -NoProfile -Command "Install-Module Terminal-Icons -Scope CurrentUser -Force -AllowClobber" 2>&1 | Out-Null
-    Write-Ok "Terminal-Icons installed (PowerShell 7)"
+    Write-Step "Installing modules for PowerShell 7..."
+    foreach ($mod in $psModules) {
+      Write-Info "  Installing $mod..."
+      & "C:\Program Files\PowerShell\7\pwsh.exe" -NoProfile -Command "Install-Module $mod -Scope CurrentUser -Force -AllowClobber -ErrorAction SilentlyContinue" 2>&1 | Out-Null
+    }
+    Write-Ok "PowerShell 7 modules installed"
   }
 
   Write-Host ""
@@ -396,12 +424,19 @@ $ompThemePath = Ensure-ThemeFile
 Write-Ok "Theme downloaded: bubbles.omp.json"
 
 Write-Host ""
+# Detect actual Documents folder (handles OneDrive redirection)
+$documentsFolder = [Environment]::GetFolderPath('MyDocuments')
+if (-not $documentsFolder) {
+  $documentsFolder = "$env:USERPROFILE\Documents"
+}
+Write-Info "Documents folder detected: $documentsFolder"
+
 Write-Step "Configuring Windows PowerShell profile..."
-Update-Profile "$env:USERPROFILE\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1" "oh-my-posh init powershell --config `"$ompThemePath`" | Out-String | Invoke-Expression"
+Update-Profile "$documentsFolder\WindowsPowerShell\Microsoft.PowerShell_profile.ps1" "oh-my-posh init powershell --config `"$ompThemePath`" | Out-String | Invoke-Expression"
 Write-Ok "Windows PowerShell profile configured"
 
 Write-Step "Configuring PowerShell 7 profile..."
-Update-Profile "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1" "oh-my-posh init pwsh --config `"$ompThemePath`" | Out-String | Invoke-Expression"
+Update-Profile "$documentsFolder\PowerShell\Microsoft.PowerShell_profile.ps1" "oh-my-posh init pwsh --config `"$ompThemePath`" | Out-String | Invoke-Expression"
 Write-Ok "PowerShell 7 profile configured"
 
 Write-Host ""
