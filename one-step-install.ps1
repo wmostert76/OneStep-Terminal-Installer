@@ -242,6 +242,7 @@ Write-Section "Install Apps"
 $wingetIds = @(
   'Microsoft.WindowsTerminal',
   'Microsoft.PowerShell',
+  'Microsoft.PowerToys',
   'OpenJS.NodeJS.LTS',
   'Python.Python.3.12',
   'Python.Launcher',
