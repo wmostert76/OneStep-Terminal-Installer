@@ -1,8 +1,42 @@
-# OneStep Terminal Installer
+# 🖥️ OneStep Terminal Installer
 
-A clean, repeatable, one-step installer for your Windows terminal setup. Transforms your Windows terminal into a modern, AI-powered development environment in minutes.
+> Transform your Windows terminal into a modern, AI-powered development environment | One command setup | Beautiful & Functional
 
-## Quick Start
+Een complete, herhaalbare one-step installer voor je Windows terminal setup. Transformeert je Windows terminal in een moderne, AI-powered development omgeving.
+
+## ✨ Features
+
+### Terminal Experience
+- **Windows Terminal** met JetBrainsMono Nerd Font
+- **PowerShell 7** als standaard profiel
+- **Oh My Posh** met bubbles theme
+- **Terminal-Icons** voor mooie directory listings
+- **Smart history suggestions** met list view
+- **Administrator by default** voor soepele workflow
+
+### AI-Powered CLI Tools
+| Tool | Command | Beschrijving |
+|------|---------|--------------|
+| Claude Code | `claude` | Anthropic's Claude assistant |
+| Gemini CLI | `gemini` | Google's Gemini assistant |
+| Codex CLI | `codex` | OpenAI's Codex assistant |
+| OpenCode | `opencode` | AI coding assistant |
+
+### Development Tools
+- **Zoxide** - Slimmer cd navigatie (`z` command)
+- **Node.js LTS** + latest npm
+- **Python 3.12** met launcher
+- **Git** + GitHub CLI
+- **7-Zip**, **Midnight Commander**, **Chrome**
+- **UniGetUI** - Universal package manager GUI
+
+### Windows Customization
+- 🌙 **Dark Mode** system-wide
+- 🧹 **Clean Taskbar** - Search, Widgets, Copilot hidden
+- 🌐 **Chrome** als default browser
+- ⚡ **UAC disabled** voor snellere workflow
+
+## 🚀 Quick Start
 
 **One command. That's it.**
 
@@ -10,168 +44,72 @@ A clean, repeatable, one-step installer for your Windows terminal setup. Transfo
 irm "https://raw.githubusercontent.com/wmostert76/OneStep-Terminal-Installer/master/one-step-install.ps1" | iex
 ```
 
-> Safe to run multiple times - The installer intelligently updates existing installations!
+> ✅ Veilig om meerdere keren te runnen - Updates bestaande installaties intelligent!
 
----
+## 📦 Package Overview
 
-## What You Get
-
-### Terminal Experience
-- **Windows Terminal** with JetBrainsMono Nerd Font
-- **PowerShell 7** set as default profile
-- **Oh My Posh** with bubbles theme
-- **Terminal-Icons** for beautiful directory listings
-- **Smart history suggestions** with list view
-- **Always runs as Administrator** by default
-
-### AI-Powered CLI Tools
-- **Claude Code** - Anthropic's Claude assistant (`claude`)
-- **Gemini CLI** - Google's Gemini assistant (`gemini`)
-- **Codex CLI** - OpenAI's Codex assistant (`codex`)
-- **OpenCode** - AI coding assistant (`opencode`)
-
-### Development Tools
-- **Zoxide** - Smarter cd navigation (`z` command)
-- **Node.js LTS** + latest npm
-- **Python 3.12** with launcher
-- **Git** + GitHub CLI
-- **7-Zip** compression utility
-- **Midnight Commander** file manager
-- **Google Chrome** browser
-- **UniGetUI** - Universal package manager GUI
-
-### Windows Customization
-- **Dark Mode** enabled system-wide
-- **Taskbar cleaned up** - Search, Task View, Widgets, Copilot, Chat hidden
-- **Chrome set as default browser**
-- **Edge shortcuts removed** from desktop
-- **UAC disabled** for smoother workflow
-
----
-
-## Package List
-
-### WinGet Packages (Always Latest)
-| Package | Purpose |
-|---------|---------|
+### WinGet Packages
+| Package | Doel |
+|---------|------|
 | `Microsoft.WindowsTerminal` | Modern terminal emulator |
 | `Microsoft.PowerShell` | PowerShell 7+ |
 | `OpenJS.NodeJS.LTS` | Node.js runtime |
-| `Python.Python.3.12` | Python programming language |
-| `Python.Launcher` | Python version launcher |
-| `DEVCOM.JetBrainsMonoNerdFont` | Developer-friendly font with icons |
+| `Python.Python.3.12` | Python |
+| `DEVCOM.JetBrainsMonoNerdFont` | Developer font met icons |
 | `JanDeDobbeleer.OhMyPosh` | Prompt theme engine |
-| `ajeetdsouza.zoxide` | Smarter cd command |
-| `GNU.MidnightCommander` | File manager |
-| `Git.Git` | Version control |
-| `GitHub.cli` | GitHub command line |
-| `7zip.7zip` | File compression |
-| `Google.Chrome` | Web browser |
-| `MartiCliment.UniGetUI` | Package manager GUI |
+| `ajeetdsouza.zoxide` | Slimmer cd command |
+| `Git.Git` + `GitHub.cli` | Version control |
 
-### NPM Global Packages (Always Latest)
-| Package | Command | Purpose |
-|---------|---------|---------|
-| `@anthropic-ai/claude-code` | `claude` | Claude AI assistant |
-| `@google/gemini-cli` | `gemini` | Gemini AI assistant |
-| `@openai/codex` | `codex` | OpenAI Codex assistant |
-| `opencode-ai` | `opencode` | OpenCode AI tool |
-| `opencode-windows-x64` | - | OpenCode Windows binary |
-
-### PowerShell Modules
-- `PSReadLine` - Enhanced command line editing with history suggestions
-- `Terminal-Icons` - File and folder icons in terminal
-
----
-
-## Windows Customization Details
-
-| Setting | Value |
-|---------|-------|
-| **Theme** | Dark Mode (Apps + System) |
-| **Search Box** | Hidden |
-| **Task View** | Hidden |
-| **Widgets** | Disabled |
-| **Copilot Button** | Hidden |
-| **Chat Icon** | Hidden |
-| **Default Browser** | Chrome |
-| **Terminal Elevation** | Always Administrator |
-
-### Taskbar Pinning (Manual Step)
-Windows 11 blocks programmatic taskbar pinning. After installation, manually pin:
-1. Press `Win`, type `Chrome`, right-click > **Pin to taskbar**
-2. Press `Win`, type `Terminal`, right-click > **Pin to taskbar**
-
----
-
-## System Changes
-
-| Change | Details |
-|--------|---------|
-| **Execution Policy** | `Unrestricted` (LocalMachine or CurrentUser) |
-| **UAC** | Disabled via registry (requires reboot) |
-| **Terminal Font** | JetBrainsMono Nerd Font |
-| **Default Profile** | PowerShell 7 |
-| **Terminal Elevation** | `elevate: true` in settings |
-| **PATH Variables** | npm global and WinGet Links added |
-
----
-
-## Customization
-
-Edit `one-step-install.ps1` to personalize:
-
-### Add/Remove Applications
-```powershell
-$wingetIds = @(
-  'Microsoft.WindowsTerminal',
-  'YourApp.PackageId'  # Add your apps
-)
+### NPM Global Packages
+```
+@anthropic-ai/claude-code → claude
+@google/gemini-cli → gemini
+@openai/codex → codex
+opencode-ai → opencode
 ```
 
-### Change AI Tools
-```powershell
-$npmPackages = @(
-  "@anthropic-ai/claude-code",
-  "your-npm-tool"  # Add more
-)
-```
+## 💡 Usage Tips
 
-### Change Oh My Posh Theme
-Browse themes at https://ohmyposh.dev/docs/themes and update the URL in `Ensure-ThemeFile` function.
-
----
-
-## Usage Tips
-
-### First Run
-1. Close your terminal after installation
-2. Open a NEW terminal to apply PATH changes
+### Na Installatie
+1. Sluit je terminal
+2. Open een NIEUWE terminal voor PATH changes
 3. Test AI commands: `claude`, `gemini`, `codex`
-4. Navigate smartly: `z <directory>` instead of `cd`
+4. Navigeer slim: `z <directory>` ipv `cd`
 
 ### Updating
-Just re-run the installer! It safely:
-- Updates all packages to latest versions
-- Preserves your customizations
-- Fixes broken configurations
+Re-run de installer! Het:
+- Update alle packages naar latest
+- Behoudt je customizations
+- Fixt broken configurations
 
-### Troubleshooting
+## 🔧 Customization
 
-| Issue | Solution |
-|-------|----------|
-| PSReadLine error | Restart PowerShell and re-run |
-| Fonts not showing | Restart Windows Terminal |
-| Commands not found | Close and reopen terminal |
-| Taskbar icons missing | Manual pin (Windows 11 limitation) |
-| Widgets still visible | Toggle off in Settings > Taskbar |
+Edit `one-step-install.ps1`:
 
----
+```powershell
+# Apps toevoegen/verwijderen
+$wingetIds = @(
+  'Microsoft.WindowsTerminal',
+  'YourApp.PackageId'
+)
 
-## License
+# AI tools wijzigen
+$npmPackages = @(
+  "@anthropic-ai/claude-code",
+  "your-npm-tool"
+)
+```
 
-MIT License - Feel free to use, modify, and distribute!
+## 🐛 Troubleshooting
 
-## Contributing
+| Issue | Oplossing |
+|-------|-----------|
+| PSReadLine error | Restart PowerShell en re-run |
+| Fonts niet zichtbaar | Restart Windows Terminal |
+| Commands not found | Sluit en heropen terminal |
+| Widgets nog zichtbaar | Settings > Taskbar > Toggle off |
 
-Found a bug? Want to add a feature? PRs welcome!
+## 📄 License
+
+MIT License - Vrij te gebruiken, wijzigen en distribueren!
+
