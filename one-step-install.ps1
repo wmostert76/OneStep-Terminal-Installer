@@ -213,6 +213,14 @@ function Update-Profile($profilePath, $shellInitLine) {
   # zoxide (add guard for when not installed)
   if (-not ($lines -match 'zoxide init')) { $lines += 'if (Get-Command zoxide -ErrorAction SilentlyContinue) { zoxide init powershell | Out-String | Invoke-Expression }' }
 
+  # Midnight Commander PATH
+  $mcPathLine = '$mcPath = "C:\Program Files\Midnight Commander"; if ((Test-Path (Join-Path $mcPath "mc.exe")) -and ($env:PATH -notlike "*$mcPath*")) { $env:PATH = "$mcPath;$env:PATH" }'
+  if (-not ($lines -match 'Midnight Commander')) { $lines += $mcPathLine }
+
+  # PowerToys WinGet CommandNotFound module
+  $wingetCmdLine = 'if (Get-Command winget -ErrorAction SilentlyContinue) { Import-Module -Name Microsoft.WinGet.CommandNotFound -ErrorAction SilentlyContinue }'
+  if (-not ($lines -match 'WinGet.CommandNotFound')) { $lines += $wingetCmdLine }
+
   Set-Content -Path $profilePath -Value $lines
   Write-Host "Updated profile: $profilePath"
 }
