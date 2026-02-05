@@ -206,9 +206,6 @@ function Update-Profile($profilePath, $shellInitLine) {
   # z module for directory jumping
   if (-not ($lines -match 'Import-Module z')) { $lines += 'Import-Module z' }
 
-  # PowerTab for enhanced tab completion (silently skip if not available)
-  if (-not ($lines -match 'Import-Module PowerTab')) { $lines += 'Import-Module PowerTab -ErrorAction SilentlyContinue *>$null' }
-
   # Ensure npm global path is in session
   $npmPathLine = '$npmPrefix = (npm config get prefix).Trim(); if ($npmPrefix -and $env:Path -notlike "*$npmPrefix*") { $env:Path += ";$npmPrefix" }'
   if (-not ($lines -match 'npm config get prefix')) { $lines += $npmPathLine }
@@ -325,7 +322,7 @@ Write-Ok "NuGet provider ready"
 try {
   Write-Host ""
   # Modules to install for both Windows PowerShell and PowerShell 7
-  $psModules = @('PSReadLine', 'Terminal-Icons', 'posh-git', 'PSFzf', 'z', 'PowerTab')
+  $psModules = @('PSReadLine', 'Terminal-Icons', 'posh-git', 'PSFzf', 'z')
 
   Write-Step "Installing modules for Windows PowerShell..."
   foreach ($mod in $psModules) {
