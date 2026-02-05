@@ -52,8 +52,49 @@ Write-Host ""
 Start-Sleep -Milliseconds 500
 
 function Ensure-Winget {
-  if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-    throw 'winget not found. Install App Installer from Microsoft Store.'
+  if (Get-Command winget -ErrorAction SilentlyContinue) {
+    return
+  }
+
+  Write-Info "winget not found - bootstrapping installation..."
+
+  # Ensure TLS 1.2 for downloads
+  [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072
+
+  # Suppress progress bars for faster downloads
+  $ProgressPreference = 'SilentlyContinue'
+
+  try {
+    # Install NuGet provider if needed
+    Write-Info "Ensuring NuGet provider..."
+    Install-PackageProvider -Name NuGet -Force -ErrorAction SilentlyContinue | Out-Null
+
+    # Install Microsoft.WinGet.Client module
+    Write-Info "Installing WinGet PowerShell module..."
+    Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery -ErrorAction Stop | Out-Null
+
+    # Use Repair-WinGetPackageManager to bootstrap winget
+    Write-Info "Bootstrapping winget via Repair-WinGetPackageManager..."
+    Repair-WinGetPackageManager -AllUsers -Force -Latest -ErrorAction Stop
+
+    # Refresh PATH to pick up winget
+    $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+
+    # Add WindowsApps to PATH if needed
+    $windowsApps = Join-Path $env:LOCALAPPDATA "Microsoft\WindowsApps"
+    if ((Test-Path $windowsApps) -and ($env:Path -notlike "*$windowsApps*")) {
+      $env:Path = "$windowsApps;$env:Path"
+    }
+
+    # Verify installation
+    Start-Sleep -Seconds 2
+    if (Get-Command winget -ErrorAction SilentlyContinue) {
+      Write-Ok "winget installed successfully!"
+    } else {
+      throw "winget installation completed but command not found. Please restart PowerShell and run again."
+    }
+  } catch {
+    throw "Failed to bootstrap winget: $_. Please install App Installer from Microsoft Store manually."
   }
 }
 
