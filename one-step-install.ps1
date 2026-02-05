@@ -180,8 +180,13 @@ function Update-Profile($profilePath, $shellInitLine) {
   if (-not ($lines -match 'PredictionViewStyle ListView')) {
     $lines += @(
       'Import-Module PSReadLine',
+      'try { Set-PSReadLineOption -HistorySaveStyle SaveIncrementally } catch { }',
       'try { Set-PSReadLineOption -PredictionSource History -PredictionViewStyle ListView -HistorySearchCursorMovesToEnd } catch { }',
-      'try { Set-PSReadLineOption -MaximumHistoryCount 10 } catch { }'
+      'try { Set-PSReadLineOption -MaximumHistoryCount 10 } catch { }',
+      'try { Set-PSReadLineKeyHandler -Key UpArrow -Function HistorySearchBackward } catch { }',
+      'try { Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward } catch { }',
+      'try { Set-PSReadLineKeyHandler -Key RightArrow -Function AcceptNextSuggestionWord } catch { }',
+      'try { Set-PSReadLineKeyHandler -Key Ctrl+RightArrow -Function AcceptSuggestion } catch { }'
     )
   } else {
     $lines = $lines | ForEach-Object { if ($_ -match 'MaximumHistoryCount') { 'try { Set-PSReadLineOption -MaximumHistoryCount 10 } catch { }' } else { $_ } }
@@ -200,6 +205,9 @@ function Update-Profile($profilePath, $shellInitLine) {
 
   # z module for directory jumping
   if (-not ($lines -match 'Import-Module z')) { $lines += 'Import-Module z' }
+
+  # PowerTab for enhanced tab completion (silently skip if not available)
+  if (-not ($lines -match 'Import-Module PowerTab')) { $lines += 'Import-Module PowerTab -ErrorAction SilentlyContinue *>$null' }
 
   # Ensure npm global path is in session
   $npmPathLine = '$npmPrefix = (npm config get prefix).Trim(); if ($npmPrefix -and $env:Path -notlike "*$npmPrefix*") { $env:Path += ";$npmPrefix" }'
@@ -317,7 +325,7 @@ Write-Ok "NuGet provider ready"
 try {
   Write-Host ""
   # Modules to install for both Windows PowerShell and PowerShell 7
-  $psModules = @('PSReadLine', 'Terminal-Icons', 'posh-git', 'PSFzf', 'z')
+  $psModules = @('PSReadLine', 'Terminal-Icons', 'posh-git', 'PSFzf', 'z', 'PowerTab')
 
   Write-Step "Installing modules for Windows PowerShell..."
   foreach ($mod in $psModules) {
