@@ -182,14 +182,14 @@ function Update-Profile($profilePath, $shellInitLine) {
       'Import-Module PSReadLine',
       'try { Set-PSReadLineOption -HistorySaveStyle SaveIncrementally } catch { }',
       'try { Set-PSReadLineOption -PredictionSource History -PredictionViewStyle ListView -HistorySearchCursorMovesToEnd } catch { }',
-      'try { Set-PSReadLineOption -MaximumHistoryCount 10 } catch { }',
+      'try { Set-PSReadLineOption -MaximumHistoryCount 10000 } catch { }',
       'try { Set-PSReadLineKeyHandler -Key UpArrow -Function HistorySearchBackward } catch { }',
       'try { Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward } catch { }',
       'try { Set-PSReadLineKeyHandler -Key RightArrow -Function AcceptNextSuggestionWord } catch { }',
       'try { Set-PSReadLineKeyHandler -Key Ctrl+RightArrow -Function AcceptSuggestion } catch { }'
     )
   } else {
-    $lines = $lines | ForEach-Object { if ($_ -match 'MaximumHistoryCount') { 'try { Set-PSReadLineOption -MaximumHistoryCount 10 } catch { }' } else { $_ } }
+    $lines = $lines | ForEach-Object { if ($_ -match 'MaximumHistoryCount') { 'try { Set-PSReadLineOption -MaximumHistoryCount 10000 } catch { }' } else { $_ } }
   }
 
   # Terminal-Icons
