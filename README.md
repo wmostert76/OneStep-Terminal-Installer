@@ -17,7 +17,7 @@ Een complete, herhaalbare one-step installer voor je Windows terminal setup. Tra
 ### AI-Powered CLI Tools
 | Tool | Command | Beschrijving |
 |------|---------|--------------|
-| Claude Code | `claude` | Anthropic's Claude assistant |
+| Claude Code | `claude` | Anthropic's Claude assistant (native installer) |
 | Gemini CLI | `gemini` | Google's Gemini assistant |
 | Codex CLI | `codex` | OpenAI's Codex assistant |
 | OpenCode | `opencode` | AI coding assistant |
@@ -60,13 +60,24 @@ irm "https://raw.githubusercontent.com/wmostert76/OneStep-Terminal-Installer/mas
 | `ajeetdsouza.zoxide` | Slimmer cd command |
 | `Git.Git` + `GitHub.cli` | Version control |
 
+### Claude Code (Native Installer)
+| Package | Command | Beschrijving |
+|---------|---------|--------------|
+| Claude Code | `claude` | Anthropic Claude AI assistant (via `irm https://claude.ai/install.ps1`) |
+
 ### NPM Global Packages
-```
-@anthropic-ai/claude-code → claude
-@google/gemini-cli → gemini
-@openai/codex → codex
-opencode-ai → opencode
-```
+| Package | Command | Beschrijving |
+|---------|---------|--------------|
+| `@google/gemini-cli` | `gemini` | Gemini AI assistant |
+| `@openai/codex` | `codex` | OpenAI Codex assistant |
+| `opencode-ai` | `opencode` | OpenCode AI tool |
+
+### PowerShell Modules
+- `PSReadLine` - Enhanced command line editing
+- `Terminal-Icons` - File en folder icons
+- `posh-git` - Git integration
+- `PSFzf` - Fuzzy finding (requires fzf)
+- `z` - Directory jumping
 
 ## 💡 Usage Tips
 
@@ -93,11 +104,12 @@ $wingetIds = @(
   'YourApp.PackageId'
 )
 
-# AI tools wijzigen
+# AI tools wijzigen (NPM-based)
 $npmPackages = @(
-  "@anthropic-ai/claude-code",
+  "@google/gemini-cli",
   "your-npm-tool"
 )
+# Note: Claude Code uses native installer (irm https://claude.ai/install.ps1 | iex)
 ```
 
 ## 🐛 Troubleshooting
@@ -112,4 +124,3 @@ $npmPackages = @(
 ## 📄 License
 
 MIT License - Vrij te gebruiken, wijzigen en distribueren!
-

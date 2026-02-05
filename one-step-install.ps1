@@ -164,12 +164,17 @@ function Update-Profile($profilePath, $shellInitLine) {
   $content = Get-Content -Path $profilePath -ErrorAction SilentlyContinue
   $lines = if ($content) { $content } else { @() }
 
-  # oh-my-posh init line
+  # Ensure WindowsApps is on PATH (for MSIX-installed apps like oh-my-posh, claude)
+  $windowsAppsLine = '$wa = Join-Path $env:LOCALAPPDATA "Microsoft\WindowsApps"; if (($env:PATH -notlike "*$wa*") -and (Test-Path $wa)) { $env:PATH = "$wa;$env:PATH" }'
+  if (-not ($lines -match 'Microsoft\\WindowsApps')) { $lines = @($windowsAppsLine) + $lines }
+
+  # oh-my-posh init line (with guard)
+  $guardedInitLine = 'if (Get-Command oh-my-posh -ErrorAction SilentlyContinue) { ' + $shellInitLine + ' }'
   $foundOmp = $false
   $lines = $lines | ForEach-Object {
-    if ($_ -match '^oh-my-posh init') { $foundOmp = $true; $shellInitLine } else { $_ }
+    if ($_ -match 'oh-my-posh') { $foundOmp = $true; $guardedInitLine } else { $_ }
   }
-  if (-not $foundOmp) { $lines = @($shellInitLine) + $lines }
+  if (-not $foundOmp) { $lines = @($guardedInitLine) + $lines }
 
   # PSReadLine history list suggestions (wrapped in try/catch for non-interactive sessions)
   if (-not ($lines -match 'PredictionViewStyle ListView')) {
@@ -188,10 +193,9 @@ function Update-Profile($profilePath, $shellInitLine) {
   # posh-git for Git integration
   if (-not ($lines -match 'Import-Module posh-git')) { $lines += 'Import-Module posh-git' }
 
-  # PSFzf for fuzzy finding (requires fzf binary)
+  # PSFzf for fuzzy finding (requires fzf binary - add guard)
   if (-not ($lines -match 'Import-Module PSFzf')) {
-    $lines += 'Import-Module PSFzf'
-    $lines += "Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' -PSReadlineChordReverseHistory 'Ctrl+r'"
+    $lines += 'if (Get-Command fzf -ErrorAction SilentlyContinue) { Import-Module PSFzf; Set-PsFzfOption -PSReadlineChordProvider "Ctrl+t" -PSReadlineChordReverseHistory "Ctrl+r" }'
   }
 
   # z module for directory jumping
@@ -201,8 +205,8 @@ function Update-Profile($profilePath, $shellInitLine) {
   $npmPathLine = '$npmPrefix = (npm config get prefix).Trim(); if ($npmPrefix -and $env:Path -notlike "*$npmPrefix*") { $env:Path += ";$npmPrefix" }'
   if (-not ($lines -match 'npm config get prefix')) { $lines += $npmPathLine }
 
-  # zoxide
-  if (-not ($lines -match 'zoxide init')) { $lines += 'zoxide init powershell | Out-String | Invoke-Expression' }
+  # zoxide (add guard for when not installed)
+  if (-not ($lines -match 'zoxide init')) { $lines += 'if (Get-Command zoxide -ErrorAction SilentlyContinue) { zoxide init powershell | Out-String | Invoke-Expression }' }
 
   Set-Content -Path $profilePath -Value $lines
   Write-Host "Updated profile: $profilePath"
@@ -367,7 +371,6 @@ try {
 
     $npmPackages = @(
       "npm",
-      "@anthropic-ai/claude-code",
       "@google/gemini-cli",
       "@openai/codex",
       "opencode-ai",
@@ -416,6 +419,17 @@ try {
   }
 } catch {
   Write-Warning "Could not install NPM tools: $_"
+}
+
+Write-Section "Claude Code Installation"
+Write-Step "Installing Claude Code via native installer..."
+try {
+  # Use the official Anthropic installer (recommended over npm)
+  Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://claude.ai/install.ps1'))
+  Write-Success "Claude Code installed via native installer"
+} catch {
+  Write-Warning "Could not install Claude Code: $_"
+  Write-Info "You can install manually later with: irm https://claude.ai/install.ps1 | iex"
 }
 
 Write-Section "Shell Theme + Profiles"

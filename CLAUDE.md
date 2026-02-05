@@ -22,6 +22,7 @@ The installer follows a linear, procedural flow without external dependencies. A
 2. **App Installation**: Winget-based package installation (Terminal, PowerShell 7, Node, Python, fonts, CLI tools)
 3. **PowerShell Modules**: PSReadLine and Terminal-Icons installation for both Windows PowerShell and PowerShell 7
 4. **NPM Global Tools**: Installation of AI CLI tools (gemini-cli, codex, opencode) and npm itself
+5. **Claude Code**: Native installer via `irm https://claude.ai/install.ps1 | iex` (recommended over npm)
 5. **Profile Configuration**: Oh My Posh theme setup and PowerShell profile modifications
 6. **Environment Updates**: PATH modifications and Windows broadcast for environment variable refresh
 
@@ -76,7 +77,8 @@ The installer is **fully idempotent** and handles both fresh installs and update
 **NPM Packages:**
 - Uses `npm install -g package@latest` to always install/update to latest
 - NO version pinning - always gets the newest release
-- Includes: npm, @anthropic-ai/claude-cli, @google/gemini-cli, @openai/codex, opencode-ai, opencode-windows-x64
+- Includes: npm, @google/gemini-cli, @openai/codex, opencode-ai, opencode-windows-x64
+- Note: Claude Code uses native installer instead of npm (see Claude Code section below)
 
 **PowerShell Modules:**
 - Uses `-Force` flag to allow updates
@@ -123,14 +125,45 @@ $wingetIds = @(
 ```powershell
 $npmPackages = @(
   "npm",
-  "@anthropic-ai/claude-cli",
+  "@google/gemini-cli",
   # ... existing packages ...
   "your-package"  # Add new package (no version - gets @latest)
 )
+# Note: Claude Code uses native installer, not npm
 ```
 
 **Changing the Oh My Posh theme:**
 Replace the theme URL in `Ensure-ThemeFile` function with any theme from: https://ohmyposh.dev/docs/themes
+
+## Claude Code Installation
+
+Claude Code is installed via the official Anthropic native installer (not npm):
+
+```powershell
+Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://claude.ai/install.ps1'))
+```
+
+This is the recommended method as:
+- npm installation is deprecated
+- Native installer handles PATH and updates automatically
+- Better compatibility with Windows/MSIX app model
+
+## Profile Resilience
+
+The installer generates profiles with guards to prevent errors when tools are missing:
+
+```powershell
+# WindowsApps PATH (for MSIX apps like oh-my-posh, claude)
+$wa = Join-Path $env:LOCALAPPDATA "Microsoft\WindowsApps"
+if (($env:PATH -notlike "*$wa*") -and (Test-Path $wa)) { $env:PATH = "$wa;$env:PATH" }
+
+# Guarded tool initialization
+if (Get-Command oh-my-posh -ErrorAction SilentlyContinue) { oh-my-posh init pwsh ... }
+if (Get-Command fzf -ErrorAction SilentlyContinue) { Import-Module PSFzf ... }
+if (Get-Command zoxide -ErrorAction SilentlyContinue) { zoxide init powershell ... }
+```
+
+This ensures profiles load cleanly even if some tools are not installed.
 
 ## Error Handling Philosophy
 
